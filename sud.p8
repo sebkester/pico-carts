@@ -4,7 +4,7 @@ __lua__
 --general code--
 --(stuff)--
 function _init()
-
+ -- sebby smells like a duck
 	sub_init()
 	shot_init()
  baddie_init()
