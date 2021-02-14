@@ -4,16 +4,27 @@ __lua__
 --general code--
 --(stuff)--
 function _init()
+ restart()
+ started = false
+end
+
+function restart()
 	sub_init()
 	shot_init()
  baddie_init()
  exp_init()
  dead_init()
+ started = true
 end
 
 function _update()
- if p.alive then
+
+ if started and p.alive then
  	move()
+ else
+  if btnp(4) or btnp(5) then
+   restart()
+  end
 	end
 	move_shots()
 	move_baddies()
@@ -25,7 +36,9 @@ function _update()
  end
  
  step_explosions()
- check_hits()
+ if started then 
+	 check_hits()
+ end
 end
      
 function	_draw()
@@ -48,6 +61,11 @@ function	_draw()
 		spr(b.sprite,b.x,b.y,2,b.h,b.flip)
  end
 
+ if not started then
+  draw_start()
+  return
+ end
+
 	if (p.alive) then
 		spr(p.sprite,p.x,p.y,2,1,p.flip)
  else
@@ -65,6 +83,15 @@ function	_draw()
 	print(p.score, 101, 3, 5)
 	print(p.score, 100, 2, 7)
 end		
+
+function draw_start()
+ print("sebmarines!", 41, 50, 5)
+ print("sebmarines!", 40, 49, 7)
+
+ print("ready???", 47, 70, 5)
+ print("ready???", 46, 69, 7)
+
+end
 -->8
 --submarine stuff--
 
@@ -87,6 +114,8 @@ function sub_init()
 end
 
 function	move()
+
+
 
 	if(btn(0)) then
 		p.x-=p.v
@@ -235,14 +264,16 @@ function new_baddie()
  if (b.y < 56) then
  	b.sprite = 8
  	b.h = 2
+ 	b.vx = baddie_speed * 0.5
  end
  if (b.y < 32) then
   b.sprite = 46
   b.h = 1
+ 	b.vx = baddie_speed * 2
  end
  if (rnd(1)<0.5) then
   b.x = 127
-  b.vx = -baddie_speed
+  b.vx = -b.vx
   b.flip = true
  end
  
