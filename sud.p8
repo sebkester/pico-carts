@@ -134,9 +134,8 @@ function	move()
 		 add_shot(p.x+3, p.y,0,-2,1,61,false,false)
 			p.load_delay = 20
 			sfx(7)
-		end
-		
-		if (btnp(5)) then
+	 end	
+	 if (btnp(5) and p.load_delay < 0) then
 		 v = 2
 		 x = 0
 		 
@@ -144,7 +143,7 @@ function	move()
 		 	v = -v
 		 end
 		 add_shot(p.x+x, p.y,v,0,2,3,p.flip,false)
-			p.load_delay = 30
+			p.load_delay = 20
 			sfx(6)
 		end
 		
