@@ -12,14 +12,19 @@ function _init()
 	 end 
  end 
  
- add(players, add_player())
- add(players, add_player())
- 
+ add(players, add_player(1))
+ add(players, add_player(2))
 end
 
 function _update()
-	players[1].x += 1
-	players[2].y += 0.5
+	for g in all(players) do
+	 if (btn(0, g.index-1)) try_x(g, -1)
+	 if (btn(1, g.index-1)) try_x(g, 1)
+	 if (btn(2, g.index-1)) try_y(g, -1)
+	 if (btn(3, g.index-1)) try_y(g, 1)
+ end
+	// players[1].x += 1
+	// players[2].y += 0.5
 end
 
 function _draw()
@@ -35,10 +40,13 @@ end
 
 -->8
 -- player
-function add_player()
+function add_player(index)
  p = {}
+ p.index = index
  p.x = (rnd(120) + 4) * 8
  p.y = (rnd(56) + 4) * 8
+ p.v = 1
+ p.sprite = 15 + index
  
  return p
 end
@@ -53,9 +61,24 @@ function draw_player(p, sy)
  clip( 0, sy, 128, 64 )
  map(tx,ty,-ox,sy-oy,17,9)
 
+	for g in all(players) do
+	 spr(g.sprite,g.x - tx*8 - ox - 4, sy + g.y - ty*8 -oy - 4)
+	end
+
 	print (ox)
 
 end
+
+
+function try_x(p, d)
+ p.x += p.v * d
+end
+
+function try_y(p, v)
+ p.y += p.v * d
+end
+
+
 __gfx__
 00000000005005006060005000100010000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000050000500050650011011000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
