@@ -33,10 +33,22 @@ function _update()
 		 g.fy = false
 		 g.angled = false
 		 
-		 if (btn(0, g.index-1)) try_x(g, -1)
-		 if (btn(1, g.index-1)) try_x(g, 1)
-		 if (btn(2, g.index-1)) try_y(g, -1)
-		 if (btn(3, g.index-1)) try_y(g, 1)
+		 dx = 0
+		 dy = 0
+		 if (btn(0, g.index-1)) dx = -1
+		 if (btn(1, g.index-1)) dx = 1
+		 if (btn(2, g.index-1)) dy = -1
+		 if (btn(3, g.index-1)) dy = 1
+		 
+		 if dx != 0 or dy != 0 then
+		  try_xy(g, dx, dy)
+		 end
+		 
+//		 if (btn(0, g.index-1)) try_x(g, -1)
+//		 if (btn(1, g.index-1)) try_x(g, 1)
+//		 if (btn(2, g.index-1)) try_y(g, -1)
+//		 if (btn(3, g.index-1)) try_y(g, 1)
+
 		end
  end
 	// players[1].x += 1
@@ -56,18 +68,35 @@ end
 
 -->8
 -- player
+facings = {{7,0,1},
+											{6,0,2},
+											{5,4,3}}
+
 function add_player(index)
  p = {}
  p.index = index
  p.x = (rnd(120) + 4) * 8
  p.y = (rnd(56) + 4) * 8
  p.v = 1
- p.sprite = 15 + index
+ p.sprite = 16 + (index-1)*8
  p.mining = 0
  p.mine_time = 10
  
  p.facing = 0
+ 
+ clear_area(p.x,p.y,2)
  return p
+end
+
+function clear_area(x, y, r)
+ tx = flr(p.x / 8)
+ ty = flr(p.y / 8)
+
+	for x = tx-r, tx-r+2*r do
+	 for y = ty-r, ty-r+2*r do
+		 mset(x, y, 0)
+	 end
+	end
 end
 
 function draw_player(p, sy)
@@ -90,6 +119,25 @@ function draw_player(p, sy)
 	end
 
 
+end
+
+											
+function try_xy(p, dx, dy)
+ p.facing = facings[dy+2][dx+2]
+ 
+	x = p.x + dx * p.v
+	y = p.y + dy * p.v
+
+ tx = (x-2)/8
+ ty = (y-2)/8
+
+ if (maybe_blast(p, flr(tx), flr(ty))) return
+ if (maybe_blast(p, flr(tx+2/4), flr(ty))) return
+ if (maybe_blast(p, flr(tx), flr(ty+2/4))) return
+ if (maybe_blast(p, flr(tx+2/4), flr(ty+2/4))) return
+ 
+ p.x = x
+ p.y = y
 end
 
 
