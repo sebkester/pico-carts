@@ -20,7 +20,9 @@ end
 
 function _update()
  for b in all(blasts) do
-	 b.tick += 1;
+	 b.tick += 1
+	 b.x += b.vx
+	 b.y += b.vy
 	 if (b.tick > b.duration) then
 	 	del(blasts, b)
 	 end
@@ -29,7 +31,7 @@ function _update()
 	for g in all(players) do
 		if g.mining>0 then
 			g.mining -=1
-		else
+		elseif not g.exploding and g.alive then
 		 g.fx = false
 		 g.fy = false
 		 g.angled = false
@@ -88,6 +90,12 @@ function add_player(index)
  p.mine_time = 10
  
  p.facing = 0
+ p.health = 5
+ p.max_health = 5
+ p.lives = 3
+ p.max_lives = 3
+ p.alive = true
+ p.exploding = false
  
  clear_area(p.x,p.y,2)
  return p
@@ -115,7 +123,16 @@ function draw_player(p, sy)
  map(tx,ty,-ox,sy-oy,17,9)
 
 	for g in all(players) do
-	 spr(g.sprite + g.facing,g.x - tx*8 - ox - 4, sy + g.y - ty*8 -oy - 4)
+	 if not g.exploding and g.alive then
+ 	 spr(g.sprite + g.facing,g.x - tx*8 - ox - 4, sy + g.y - ty*8 -oy - 4)
+   if (g.health < 5) then
+    line(g.x - tx*8 - ox - 5
+        ,sy + g.y - ty*8 -oy - 6
+        ,g.x + g.health*2 - tx*8 - ox - 5
+        ,sy + g.y - ty*8 -oy - 6
+        ,7+g.health)
+   end
+	 end
 	end
 	
 	for b in all(blasts) do
@@ -148,44 +165,6 @@ function try_xy(p, dx, dy)
  p.y = y
 end
 
-
-function try_x(p, d)
- if (d==1) then
-  p.facing = 2
- else
-  p.facing = 6
- end
- 
-	x = p.x + d * p.v
- tx = flr((x + 4*d) / 8)
- ty = flr((p.y+4) / 8)
-
- if maybe_blast(p, tx, ty) then
-  return
- end
- 
- p.x += p.v * d
-end
-
-function try_y(p, d)
-
- if (d==1) then
-  p.facing = 4
- else
-  p.facing = 0
- end
- 
-	y = p.y + d * p.v
- tx = flr((p.x + 4) / 8)
- ty = flr((p.y + 4*d) / 8)
-
- if maybe_blast(p, tx, ty) then
-  return
- end
-
- p.y += p.v * d
-end
-
 function is_tile_hit(p, tx, ty)
  t = mget(tx, ty)
 	if (t==1) then
@@ -199,7 +178,7 @@ function maybe_blast(p, tx, ty)
  if is_tile_hit(p, tx, ty) then
 		mset(tx, ty, 0)
 		p.mining = p.mine_time
-		add_blast(tx*8, ty*8, 10, 48, 5)
+		add_blast(tx*8, ty*8,0,0, 10, 48, 5)
 		return true
  end
 
@@ -207,12 +186,27 @@ function maybe_blast(p, tx, ty)
  
 end
 
+function damage(p)
+ p.health -= 1
+ if (p.health == 0) then
+  p.exploding = true
+  for i=1,10 do
+	  vx = rnd(2)-1
+	  vy = rnd(2)-1
+		 add_blast(p.x-4, p.y-4,vx,vy, 10, 53, 3)
+		end
+
+ end
+end
+
 -->8
 -- blast
-function add_blast(x, y, duration, sprite, sprite_count)
+function add_blast(x, y, vx, vy, duration, sprite, sprite_count)
  b = {}
  b.x = x
  b.y = y
+ b.vx = vx
+ b.vy = vy
  b.duration = duration
  b.tick = 0
  b.sprite = sprite
@@ -257,15 +251,14 @@ function move_bullet(b)
  b.y = y
  
  if is_tile_hit(b, tx, ty) then
-		b.blasting = b.blast_time
-		add_blast(x-4, y-4, b.blast_time, 53, 3)
+		add_blast(x-4, y-4,0,0, b.blast_time, 53, 3)
 
   del(bullets,b)
  else 
- 	if is_player_hit(b) then
-	 	b.blasting = b.blast_time
-			add_blast(x-4, y-4, b.blast_time, 53, 3)
-	
+  p = get_player_hit(b)
+ 	if p != nil then
+		 add_blast(x-4, y-4,0,0, b.blast_time, 53, 3)
+		 damage(p)
 	  del(bullets,b)
 
  	end
@@ -273,7 +266,7 @@ function move_bullet(b)
  
 end
 
-function is_player_hit(b)
+function get_player_hit(b)
  for p in all(players) do
   if p.index != b.player.index then
    if b.x > p.x-6 
@@ -281,12 +274,12 @@ function is_player_hit(b)
     and b.y > p.y-6
     and b.y < p.y + 5
     then
-     return true
+     return p
     end
   end
  end
  
- return false
+ return nil
 end
 __gfx__
 00000000005005006060005000100010000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
