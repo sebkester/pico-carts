@@ -77,6 +77,11 @@ function add_player(index)
  p.index = index
  p.x = (rnd(120) + 4) * 8
  p.y = (rnd(56) + 4) * 8
+
+ p.x = (rnd(10) + 4) * 8
+ p.y = (rnd(4) + 4) * 8
+
+
  p.v = 1
  p.sprite = 16 + (index-1)*8
  p.mining = 0
@@ -118,7 +123,7 @@ function draw_player(p, sy)
 	end
 
  for b in all(bullets) do
-  spr(b.sprite, b.x - tx*8 - ox - 4, b.y - ty*8 -oy - 8)
+  spr(b.sprite, b.x - tx*8 - ox - 4, sy + b.y - ty*8 -oy - 4)
   print(b.x)
  end
 
@@ -256,8 +261,32 @@ function move_bullet(b)
 		add_blast(x-4, y-4, b.blast_time, 53, 3)
 
   del(bullets,b)
+ else 
+ 	if is_player_hit(b) then
+	 	b.blasting = b.blast_time
+			add_blast(x-4, y-4, b.blast_time, 53, 3)
+	
+	  del(bullets,b)
+
+ 	end
  end
  
+end
+
+function is_player_hit(b)
+ for p in all(players) do
+  if p.index != b.player.index then
+   if b.x > p.x-6 
+    and b.x < p.x + 5  
+    and b.y > p.y-6
+    and b.y < p.y + 5
+    then
+     return true
+    end
+  end
+ end
+ 
+ return false
 end
 __gfx__
 00000000005005006060005000100010000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
