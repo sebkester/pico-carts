@@ -114,7 +114,7 @@ function draw_player(p, sy)
 	end
 	
 	for b in all(blasts) do
-	 spr(blast_sprite(b), b.tx*8 - tx*8 - ox, sy + b.ty*8 - ty*8 -oy)
+	 spr(blast_sprite(b), b.x - tx*8 - ox, sy + b.y - ty*8 -oy)
 	end
 
  for b in all(bullets) do
@@ -194,7 +194,7 @@ function maybe_blast(p, tx, ty)
  if is_tile_hit(p, tx, ty) then
 		mset(tx, ty, 0)
 		p.mining = p.mine_time
-		add_blast(tx, ty, 10, 48, 5)
+		add_blast(tx*8, ty*8, 10, 48, 5)
 		return true
  end
 
@@ -204,10 +204,10 @@ end
 
 -->8
 -- blast
-function add_blast(tx, ty, duration, sprite, sprite_count)
+function add_blast(x, y, duration, sprite, sprite_count)
  b = {}
- b.tx = tx
- b.ty = ty
+ b.x = x
+ b.y = y
  b.duration = duration
  b.tick = 0
  b.sprite = sprite
@@ -253,7 +253,7 @@ function move_bullet(b)
  
  if is_tile_hit(b, tx, ty) then
 		b.blasting = b.blast_time
-		add_blast(tx, ty, b.blast_time, 53, 3)
+		add_blast(x-4, y-4, b.blast_time, 53, 3)
 
   del(bullets,b)
  end
